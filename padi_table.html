@@ -1,0 +1,459 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+  
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+<meta name="copyright" content="
+PadiCalc created by Klemens Häckel, (click3d [at] linuxmail [dot] org)
+
+Copyright (c) Klemens Häckel 2010
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+Neither the name of the Author nor the names of its contributors may be
+used to endorse or promote products derived from this software without specific
+prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+" />
+
+<SCRIPT LANGUAGE="JavaScript" TYPE="text/javascript">
+<!--
+
+function GetDiv(name){
+	return (document.layers&&document.layers[name])?document.layers[name]:(document.all&&document.all[name]&&document.all[name].style)?document.all[name].style:document[name]?document[name]:(document.getElementById(name)?document.getElementById(name).style:0);
+}
+
+
+function expand(nr, forceval){
+    // parametro forceval es opcional, se espera valores 0 o 1
+    forceval = (typeof forceval == "undefined") ? 128 : forceval;
+	idiv = GetDiv(nr);
+
+	if (idiv.display=='none'){
+        if (forceval != 0){
+  		    idiv.display='block';
+        }
+	} else {
+        if (forceval != 1){
+  		    idiv.display='none';
+        }
+	}
+
+}
+
+
+-->
+</script>
+
+<script LANGUAGE="JavaScript" TYPE="text/javascript">
+<!--
+pgroups = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+pgroup = [0,0,0,0]; // final de primer actividad, al inicio de intervalo (normalmente igual final primer actividad), final intervalo, final final
+
+depth = [10,12,14,16,18,20,22,25,30,35,40,42];
+divetime = [
+"10-160-219-10,20,26,30,34,37,41,45,50,54,59,64,70,75,82,88,95,104,112,122,133,145,160,178,199,219",
+"12-116-147-9,17,23,26,29,32,35,38,42,45,49,53,57,62,66,71,76,82,88,94,101,108,116,125,134,147",
+"14-82-98-8,15,19,22,24,27,29,32,35,37,40,43,47,50,53,57,61,64,68,73,77,82,87,92,98",
+"16-63-72-7,13,17,19,21,23,25,27,29,32,34,37,39,42,45,48,50,53,56,60,63,67,70,72",
+"18-51-56-6,11,15,16,18,20,22,24,26,28,30,32,34,36,39,41,43,46,48,51,53,55,56",
+"20-40-45-6,10,13,15,16,18,20,21,23,25,26,28,30,32,34,36,38,40,42,44,45",
+"22-32-37-5,9,12,13,15,16,18,19,21,22,24,25,27,29,30,32,34,36,37",
+"25-25-29-4,8,10,11,13,14,15,17,18,19,21,22,23,25,26,28,29",
+"30-0-20-3,6,8,9,10,11,12,13,14,15,16,17,19,20",
+"35-0-14-3,5,7,8,9,9,10,11,12,13,14",
+"40-0-9-5,5,6,7,7,8,9",
+"42-0-8-4,4,6,6,7,8",
+];
+splitsymbol ="-,";
+
+/*a"0:00-3:00",*/
+interval = [
+"A-0-0-3:00",
+"B-0-0-0:47,3:48",
+"C-0-0-0:21,1:09,4:10",
+"D-0-0-0:08,0:30,1:18,4:19",
+"E-0-0-0:07,0:16,0:38,1:27,4:28",
+"F-0-0-0:07,0:15,0:24,0:46,1:34,4:35",
+"G-0-0-0:06,0:13,0:22,0:31,0:53,1:41,4:42",
+"H-0-0-0:05,0:12,0:20,0:28,0:37,0:59,1:47,4:48",
+"I-0-0-0:05,0:11,0:18,0:26,0:34,0:43,1:05,1:53,4:54",
+"J-0-0-0:05,0:11,0:17,0:24,0:31,0:40,0:49,1:11,1:59,5:00",
+"K-0-0-0:04,0:10,0:16,0:22,0:29,0:37,0:45,0:54,1:16,2:04,5:05",
+"L-0-0-0:04,0:09,0:15,0:21,0:27,0:34,0:42,0:50,0:59,1:21,2:09,5:10",
+"M-0-0-0:04,0:09,0:14,0:19,0:25,0:32,0:39,0:46,0:55,1:04,1:25,2:14,5:15",
+"N-0-0-0:03,0:08,0:13,0:18,0:24,0:30,0:36,0:43,0:51,0:59,1:08,1:30,2:18,5:19",
+"O-0-0-0:03,0:08,0:12,0:17,0:23,0:28,0:34,0:41,0:47,0:55,1:03,1:12,1:34,2:23,5:24",
+"P-0-0-0:03,0:07,0:12,0:16,0:21,0:27,0:32,0:38,0:45,0:51,0:59,1:07,1:16,1:38,2:27,5:28",
+"Q-0-0-0:03,0:07,0:11,0:16,0:20,0:25,0:30,0:36,0:42,0:48,0:55,1:03,1:11,1:20,1:42,2:30,5:31",
+"R-0-0-0:03,0:07,0:11,0:15,0:19,0:24,0:29,0:34,0:40,0:46,0:52,0:59,1:07,1:15,1:24,1:46,2:34,5:35",
+"S-0-0-0:03,0:06,0:10,0:14,0:18,0:23,0:27,0:32,0:38,0:43,0:49,0:56,1:03,1:10,1:18,1:27,1:49,2:38,5:39",
+"T-0-0-0:02,0:06,0:10,0:13,0:17,0:22,0:26,0:31,0:36,0:41,0:47,0:53,0:59,1:06,1:13,1:22,1:31,1:53,2:41,5:42",
+"U-0-0-0:02,0:06,0:09,0:13,0:17,0:21,0:25,0:29,0:34,0:39,0:44,0:50,0:56,1:02,1:09,1:17,1:25,1:34,1:56,2:44,5:45",
+"V-0-0-0:02,0:05,0:09,0:12,0:16,0:20,0:24,0:28,0:33,0:37,0:42,0:47,0:53,0:59,1:05,1:12,1:20,1:28,1:37,1:59,2:47,5:48",
+"W-0-0-0:02,0:05,0:08,0:12,0:15,0:19,0:23,0:27,0:31,0:36,0:40,0:45,0:50,0:56,1:02,1:08,1:15,1:23,1:31,1:40,2:02,2:50,5:51",
+"X-0-0-0:02,0:05,0:08,0:11,0:15,0:18,0:22,0:26,0:30,0:34,0:39,0:43,0:48,0:53,0:59,1:05,1:11,1:18,1:26,1:34,1:43,2:05,2:53,5:54",
+"Y-0-0-0:02,0:05,0:08,0:11,0:14,0:18,0:21,0:25,0:29,0:33,0:37,0:41,0:46,0:51,0:56,1:02,1:08,1:14,1:21,1:29,1:37,1:46,2:08,2:56,5:57",
+"Z-0-0-0:02,0:05,0:08,0:11,0:14,0:17,0:20,0:24,0:28,0:31,0:35,0:40,0:44,0:49,0:54,0:59,1:05,1:11,1:17,1:24,1:31,1:40,1:49,2:11,2:59,6:00",
+];
+
+/*
+alert(divetime[0].split(splitsymbol[0])[1]);
+alert(eval(divetime[0].split(splitsymbol[0])[3].split(splitsymbol[1])[2])+500);
+*/
+
+
+function ResetDivs(cause_div){
+	causedivs=['init','dtime1','dbreak','dbreak2','dtime2','dtime2b'];
+	causeval = causedivs.indexOf(cause_div);
+	/*
+	clear following pressure groups, pgroup[0,0,0], (dpg1, dpg2, dpg3);
+	//swap following options, (dtime1, dbreak, dtime2)
+	//swap max levels, maxtime1, maxtime2, timeoffset
+	clear last options 
+	*/
+	pgroup[3] = 0;
+	if (causedivs.indexOf(cause_div) < 6){
+		document.getElementById('dtime2').innerHTML = '';
+	} 
+	if (causedivs.indexOf(cause_div) < 5){
+		document.getElementById('expo2').value = '10';
+		detailarray = divetime[0].split(splitsymbol[0])[3].split(splitsymbol[1]);
+		document.getElementById('timeoffset2').innerHTML = 'TNR: ' + detailarray[pgroup[2] - 1] + ' min. + TRF:';
+		document.getElementById('maxtime2').innerHTML = detailarray[detailarray.length -1] - detailarray[pgroup[2] - 1];
+	} 
+	if (causedivs.indexOf(cause_div) < 4){
+		pgroup[2] = 0;
+		document.getElementById('dbreak').innerHTML = '';
+		document.getElementById('timeoffset2').innerHTML = '';
+		document.getElementById('maxtime2').innerHTML = '';
+	} 
+	if (causedivs.indexOf(cause_div) < 3){
+		pgroup[1] = pgroup[0];
+		expand('dpg2isel', 0);
+		expand('dpg2icalc', 1);
+		expand('act1', 1);
+		expand('dpg1', 1);
+		document.getElementById('dpg2icalc').innerHTML = pgroups.charAt(pgroup[1]);
+	} 
+	if (causedivs.indexOf(cause_div) < 2){
+		pgroup[0] = 0;
+		document.getElementById('dtime1').innerHTML = '';
+		document.getElementById('dpg2icalc').innerHTML = '';
+	} 
+
+	document.getElementById('dpg1').innerHTML = pgroups.charAt(pgroup[0]);
+	document.getElementById('dpg2').innerHTML = pgroups.charAt(pgroup[2]);
+	document.getElementById('dpg3').innerHTML = pgroups.charAt(pgroup[3]);
+}
+
+
+function AddMinute(tstring){
+	retstr = '';
+	tparts = tstring.split(':');
+	//pgroups.charAt(' + i + ')
+	if (tparts[1].charAt(0) != '0' ){
+		if (eval(tparts[1]) > 58 ){
+			retstr = '' + (eval(tparts[0]) + 1) + ':00';
+		}else{
+			retstr = '' + tparts[0] + ':' + (eval(tparts[1]) + 1);
+		}
+	}else{
+		if (eval(tparts[1].charAt(1)) < 9 ){
+			retstr = '' + tparts[0] + ':0' + (eval(tparts[1].charAt(1)) + 1);
+		}else{
+			retstr = '' + tparts[0] + ':10';
+		}
+	}
+	
+	return retstr;
+}
+
+
+function GenRadios(targetdiv, showarray, pgoffset){
+	retstring ='';
+	showmode = 'radio2tr';
+	locoffset = 0;
+    ResetDivs(targetdiv);
+	basearray = showarray.split(splitsymbol[0]);
+	detailarray = basearray[3].split(splitsymbol[1]);
+	//alert(detailarray);
+
+	if (showmode == 'radio2tr'){
+		retstring = '<table><tr>';
+		outputdiv = targetdiv;
+		if (targetdiv == 'dbreak2'){
+			outputdiv = 'dbreak';
+		}
+		if (targetdiv == 'dtime2b'){
+			outputdiv = 'dtime2';
+			locoffset = detailarray[pgroup[2] - 1];
+		}
+	}
+
+    if (detailarray.length > 0){
+        for ( var i = 0; i < detailarray.length; i++) {
+			currstr = '';
+			if ((targetdiv == 'dbreak') || (targetdiv == 'dbreak2') ){
+				if (i == 0){
+					currstr = '0:00-<br>' + detailarray[i] ;
+				}else{
+					currstr = AddMinute(detailarray[i-1]) + '-<br>' + detailarray[i] ;
+				}
+			}else{
+				if ((i < (detailarray.length - 1)) && (eval(detailarray[i+1]) > eval(detailarray[i]) ) && (eval(detailarray[i]) > locoffset)){
+					if ((eval(detailarray[i])-1) > eval(basearray[1]) ){
+						/* mostrar en gris */
+						currstr = '<i>' + (eval(detailarray[i]) - locoffset) + '</i>';
+					} else {
+						currstr = (eval(detailarray[i]) - locoffset);
+					}
+				}
+				if ((i == (detailarray.length - 1)) ){
+					currstr = '<b>' + (eval(detailarray[i]) - locoffset) + '</b>';
+				}
+			}
+			retstring = retstring + '<td>' + currstr + '</td>';
+		}
+		retstring = retstring + '</tr><tr>';
+		/* causedivs=['dtime1','dbreak','dtime2']; */
+		namescript = '';
+        for ( var i = 0; i < detailarray.length; i++) {
+			if (targetdiv == 'dtime1'){
+				/*namescript = '<input type="radio" name="time1" onclick="alert(pgroups.charAt(' + i + '))">'; 
+				namescript = '<input type="radio" name="time1" onclick="alert('+i+');">';
+				*/
+				namescript = '<input type="radio" name="time1" onclick="pgroup[0]=' + (i + 1) + ';GenRadios(' + "'dbreak', interval[" + (i ) + '], 0);">';
+			}
+			if ((targetdiv == 'dtime2')|| (targetdiv == 'dtime2b')){
+				namescript = '<input type="radio" name="time3" onclick="pgroup[3]=' + (i + 1) + ";document.getElementById('dpg3').innerHTML = pgroups.charAt(pgroup[3]);" + '">';
+			}
+			currstr = '';
+			if ((targetdiv == 'dbreak') || (targetdiv == 'dbreak2')){
+				/*namescript = '<input type="radio" name="time1" onclick="alert(pgroups.charAt(' + i + '))">'; 
+				namescript = '<input type="radio" name="time1" onclick="alert('+i+');">';
+				*/
+				namescript = '<input type="radio" name="time2" onclick="pgroup[2]=' + (detailarray.length - i) + ";GenRadios('dtime2b', divetime[0], pgroup[2]);" + '">';
+				currstr = namescript;
+			}else{
+				if ((i < (detailarray.length - 1)) && (eval(detailarray[i+1]) > eval(detailarray[i]) )  && (eval(detailarray[i]) > locoffset)){
+					if ((eval(detailarray[i])-1) > eval(basearray[1]) ){
+						/* mostrar en gris */
+						currstr = namescript;
+					} else {
+						currstr = namescript;
+					}
+				}
+				if (i == (detailarray.length -1)){
+						currstr = namescript ;
+				}
+			}
+			retstring = retstring + '<td>' + currstr + '</td>';
+		}
+		retstring = retstring + '</tr></table>';
+	}
+	
+	if ((targetdiv == 'dbreak') || (targetdiv == 'dbreak2')){
+		if (pgroup[1]>0){
+			document.getElementById('dbreak').innerHTML = retstring;
+		} 
+	} else {
+		document.getElementById(outputdiv).innerHTML = retstring;
+	} 
+	if (targetdiv == 'dtime1'){
+		document.getElementById('maxtime1').innerHTML = basearray[2];
+		document.getElementById('dpg1').innerHTML = pgroups.charAt(pgroup[0]);
+	}
+	if (targetdiv == 'dtime2'){
+		//document.getElementById('maxtime1').innerHTML = basearray[2];
+		document.getElementById('dpg2').innerHTML = pgroups.charAt(pgroup[2]);
+		if (pgroup[2]<1){
+			document.getElementById('timeoffset2').innerHTML = 'TRF:';
+			document.getElementById('maxtime2').innerHTML = detailarray[detailarray.length -1];
+			document.getElementById('dbreak').innerHTML = ' <i>irrelevante</i>';
+		}
+	}
+	if (targetdiv == 'dtime2b'){
+		//alert(detailarray);
+		//alert(pgroup[2]);
+		//document.getElementById('timeoffset2').innerHTML = detailarray[pgroup[2] - 1];
+		document.getElementById('timeoffset2').innerHTML = 'TNR: ' + detailarray[pgroup[2] - 1] + ' min. + TRF:';
+		document.getElementById('maxtime2').innerHTML = detailarray[detailarray.length -1] - detailarray[pgroup[2] - 1];
+	}
+	return true;
+}
+
+
+-->
+</script>
+
+
+  <title>PADI - table</title>
+
+<style type="text/css">
+div.gp {
+text-align: center;
+font-weight: bold;
+}
+</style>
+
+</head>
+<body onload="ResetDivs('init')">
+Actividad y exposición...<br>
+
+<br>
+
+<form action="" method="get" name="frm1">
+
+<table border="1">
+	<tr>
+		<td>Actividades </td>
+		<td align="center">Grupo de Presion<br> Resultado</td>
+	</tr>
+
+	<tr>
+		<td>
+		<div id="act1" name="act1">
+		<h3>Actividad inicial </h3>
+      Profundidad:
+      <select name="expo1" onchange="GenRadios('dtime1', divetime[selectedIndex], 0);return false;">
+      <option>10</option>
+      <option>12</option>
+      <option>14</option>
+      <option>16</option>
+      <option>18</option>
+      <option>20</option>
+      <option>22</option>
+      <option>25</option>
+      <option>30</option>
+      <option>35</option>
+      <option>40</option>
+      <option>42</option>
+      </select>
+m (max. tiempo: <span id="maxtime1" name="maxtime1"></span> min.)<br>
+tiempo (min.):
+<div id="dtime1" name="dtime1">
+<table>
+	<tr>
+		<td>6</td>
+		<td>10</td>
+		<td>13</td>
+		<td>15</td>
+		<td>16</td>
+		<td>18</td>
+	</tr>
+	<tr>
+		<td><input type="radio" name="time1" onclick="alert('hola')"></td>
+		<td><input type="radio" name="time1" onclick="alert('hola')"></td>
+		<td><input type="radio" name="time1" onclick="alert('hola')"></td>
+		<td><input type="radio" name="time1" onclick="alert('hola')"></td>
+		<td><input type="radio" name="time1" onclick="alert('hola')"></td>
+		<td><input type="radio" name="time1" onclick="alert('hola')"></td>
+	</tr>
+</table>
+</div>
+		</div>
+		</td>
+		<td><div class="gp" id="dpg1" name="dpg1">A</div></td>
+	</tr>
+
+	<tr>
+		<td>
+		Grupo de presión inicial <input type="checkbox" name="takeprevgp" onclick="expand('dpg2isel', 1-this.checked);expand('dpg2icalc', this.checked);expand('act1', this.checked);expand('dpg1', this.checked);" CHECKED> del resultado anterior <span id="dpg2icalc" name="dpg2icalc">V</span>
+		<div id="dpg2isel" name="dpg2isel">
+		Indico manualmente:<br> 
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=0;pgroup[2]=0;GenRadios('dtime2', divetime[0], 0);">-
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=1;GenRadios('dbreak2', interval[0], 0);">A
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=2;GenRadios('dbreak2', interval[1], 0);">B
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=3;GenRadios('dbreak2', interval[2], 0);">C
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=4;GenRadios('dbreak2', interval[3], 0);">D
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=5;GenRadios('dbreak2', interval[4], 0);">E
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=6;GenRadios('dbreak2', interval[5], 0);">F
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=7;GenRadios('dbreak2', interval[6], 0);">G
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=8;GenRadios('dbreak2', interval[7], 0);">H
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=9;GenRadios('dbreak2', interval[8], 0);">I
+		
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=10;GenRadios('dbreak2', interval[9], 0);">J
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=11;GenRadios('dbreak2', interval[10], 0);">K
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=12;GenRadios('dbreak2', interval[11], 0);">L
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=13;GenRadios('dbreak2', interval[12], 0);">M<br>
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=14;GenRadios('dbreak2', interval[13], 0);">N
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=15;GenRadios('dbreak2', interval[14], 0);">O
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=16;GenRadios('dbreak2', interval[15], 0);">P
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=17;GenRadios('dbreak2', interval[16], 0);">Q
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=18;GenRadios('dbreak2', interval[17], 0);">R
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=19;GenRadios('dbreak2', interval[18], 0);">S
+		
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=20;GenRadios('dbreak2', interval[19], 0);">T
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=21;GenRadios('dbreak2', interval[20], 0);">U
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=22;GenRadios('dbreak2', interval[21], 0);">V
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=23;GenRadios('dbreak2', interval[22], 0);">W
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=24;GenRadios('dbreak2', interval[23], 0);">X
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=25;GenRadios('dbreak2', interval[24], 0);">Y
+		<input type="radio" name="selgp2i" onclick="pgroup[1]=26;GenRadios('dbreak2', interval[25], 0);">Z
+		</div>
+		<h3>Intervalo </h3>
+		tiempo (min.): <div id="dbreak" name="dbreak">123</div>
+		</td>
+		<td><div class="gp" id="dpg2" name="dpg2">B</div></td>
+	</tr>
+
+	<tr>
+		<td>
+		<h3>Siguiente actividad</h3>
+      Profundidad:&nbsp;
+      <select name="expo2" id="expo2" onchange="if(pgroup[2]>0){GenRadios('dtime2b', divetime[selectedIndex], pgroup[2]);}return false;">
+
+      <option>10</option>
+      <option>12</option>
+      <option>14</option>
+      <option>16</option>
+      <option>18</option>
+      <option>20</option>
+
+      <option>22</option>
+      <option>25</option>
+      <option>30</option>
+      <option>35</option>
+      <option>40</option>
+      <option>42</option>
+
+      
+      </select>
+m 
+<i>(max. tiempo: <span id="maxtime2" name="maxtime2"></span> min.)</i>
+<br>
+<span id="timeoffset2" name="timeoffset2">toff</span>
+<div id="dtime2" name="dtime2">dt2</div>
+
+tiempo: min.
+		 </td>
+		<td><div class="gp" id="dpg3" name="dpg3">C</div></td>
+	</tr>
+</table>
+
+
+<input type="reset" value="Reset" onclick="ResetDivs('init')">
+</form>
+
+<br>
+
+</body>
+</html>
